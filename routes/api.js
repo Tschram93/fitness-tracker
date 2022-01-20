@@ -19,7 +19,6 @@ router.get('/api/workouts', (req, res) => {
 		});
 });
 
-
 // PUT
 router.put('/api/workouts/:id', async (req, res) => {
 	const newID = req.params.id;
@@ -38,6 +37,27 @@ router.put('/api/workouts/:id', async (req, res) => {
 								duration: exercise.duration,
 								sets: exercise.sets,
 								reps: exercise.reps,
+							},
+						},
+					}
+				)
+			);
+		} catch (err) {
+			res.status(500).json(err);
+		}         // if exercise cardio is selected send success
+	} else if (exercise.type === 'cardio') {
+	    try {
+			//if cardio exercise is selected send success code
+			res.status(200).json(
+				await Workout.updateOne(
+					{ newID },
+					{
+						$push: {
+							exercises: {
+								type: exercise.type,
+								name: exercise.name,
+								distance: exercise.distance,
+								duration: exercise.duration
 							},
 						},
 					}
