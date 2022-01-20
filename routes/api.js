@@ -92,19 +92,46 @@ router.post('/api/workouts', async (req, res) => {
 			res.status(500).json(err);
 		}
 	} else if (exercise.type === 'cardio') {
-		try {res.status(200).json(
-			await Workout.create({
-				exercises: {
-					type: exercise.type,
-					name: exercise.name,
-					distance: exercise.distance,
-					duration: exercise.duration,
-				},
-			})
-		);
+		try {
+			res.status(200).json(
+				await Workout.create({
+					exercises: {
+						type: exercise.type,
+						name: exercise.name,
+						distance: exercise.distance,
+						duration: exercise.duration,
+					},
+				})
+			);
 		} catch (err) {
 			console.log(err);
 			res.status(500).json(err);
 		}
 	}
 });
+
+
+// https://docs.mongodb.com/manual/aggregation/
+// reference page
+router.get('/api/workouts/range', (req, res) => {
+	// Get for range
+	Workout.aggregate([
+		{
+			$addFields: {
+				totalDuration: { $sum: '$exercises.duration' },
+			},
+		},
+		{ $sort: { day: -1 } },
+		{ $limit: 7 },
+	])
+		.then((workouts) => {
+			res.json(workouts);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(400).json(err);
+		});
+});
+
+
+module.exports = router;
