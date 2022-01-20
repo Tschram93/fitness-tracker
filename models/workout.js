@@ -6,9 +6,14 @@ const workoutSchema = new Schema({
 	day: {
 		type: Date,
 		default: Date.now,
+		required: "Enter a date to continue."
 	},
 	exercises: [
 		{
+				"_id": false,
+				type: {
+					type: String
+				},
 			type: {
 				type: String,
 				trim: true,
@@ -39,9 +44,9 @@ const workoutSchema = new Schema({
 });
 
 workoutSchema.virtual('Duration').get(function () {
-	let totalDuration = 0;
+	let totalTime = 0;
 	this.exercises.forEach((exercise) => {
-		totalDuration += exercise.duration;
+		totalTime += exercise.duration;
 	});
 	return totalDuration;
 });

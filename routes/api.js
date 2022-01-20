@@ -1,67 +1,54 @@
-const db = require('../models');
 const router = require('express').Router();
 const Workout = require('../models/workout');
 
 // GET workouts
-module.exports = function (app) {
-	app.get('/api/workouts', (req, res) => {
-		db.Workout.find({})
-			.then((workout) => {
-				res.json(workout);
-			})
-			.catch((err) => {
-				res.json(err);
-			});
-	});
+router.get('/api/workouts', (req, res) => {
+	Workout.aggregate([
+		{
+			$addFields: {
+				totalDuration: { $sum: '$exercises.duration' },
+			},
+		},
+	])
+		.sort({ date: -1 })
+		.then((lastWorkout) => {
+			res.json(lastWorkout);
+		})
+		.catch((err) => {
+			res.status(400).json(err);
+		});
+});
+
+
+// PUT
+router.put('/api/workouts/:id', async (req, res) => {
+	const newID = req.params.id;
+	if (req.body.exercise.type === 'resistance') {
+		try {
+			//if resistance exercise is selected send success code
+			res.status(200).json(
+				await Workout.updateOne(
+					{ newID },
+					{
+						$push: {
+							exercises: {
+								type: exercise.type,
+								name: exercise.name,
+								weight: exercise.weight,
+								duration: exercise.duration,
+								sets: exercise.sets,
+								reps: exercise.reps,
+							},
+						},
+					}
+				)
+			);
+		} catch (err) {
+			res.status(500).json(err);
+		}
+	}
+});
 
 // POST workouts
-	app.post('/api/workouts', async (req, res) => {
-		try {
-			const response = await db.Workout.create({ type: 'workout' });
-			res.json(response);
-		} catch (err) {
-			console.log('Error! Please try again.', err);
-		}
-	});
 
-
-	app.put('/api/workouts/:id', ({ body, params }, res) => {
-		const reqID = params.id;
-		var saved = [];
-
-		db.Workout.find({ _id: reqID })
-			.then((response) => {
-				saved = response[0].exercises;
-				res.json(response[0].exercises);
-				let saveExercise = [...saved, body];
-				workoutRefresh(saveExercise);
-			})
-			.catch((err) => {
-				res.json(err);
-			});
-
-		function workoutRefresh(exercises) {
-			db.Workout.findByIdAndUpdate(
-				reqID,
-				{ exercises: exercises },
-				(err, doc) => {
-					if (err) {
-						console.log(err);
-					}
-				}
-			);
-		}
-	});
-
-	app.get('/api/workouts/range', (req, res) => {
-		db.Workout.find({})
-			.then((workout) => {
-				res.json(workout);
-			})
-			.catch((err) => {
-				res.json(err);
-			});
-	});
-};
-
-module.exports = router;
+// module.exports = router;
