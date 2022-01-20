@@ -44,9 +44,9 @@ router.put('/api/workouts/:id', async (req, res) => {
 			);
 		} catch (err) {
 			res.status(500).json(err);
-		}         // if exercise cardio is selected send success
+		} // if exercise cardio is selected send success
 	} else if (exercise.type === 'cardio') {
-	    try {
+		try {
 			//if cardio exercise is selected send success code
 			res.status(200).json(
 				await Workout.updateOne(
@@ -57,7 +57,7 @@ router.put('/api/workouts/:id', async (req, res) => {
 								type: exercise.type,
 								name: exercise.name,
 								distance: exercise.distance,
-								duration: exercise.duration
+								duration: exercise.duration,
 							},
 						},
 					}
@@ -70,5 +70,41 @@ router.put('/api/workouts/:id', async (req, res) => {
 });
 
 // POST workouts
+router.post('/api/workouts', async (req, res) => {
+	const exercise = req.body;
 
-// module.exports = router;
+	if (exercise.type === 'resistance') {
+		try {
+			res.status(200).json(
+				await Workout.create({
+					exercises: {
+						name: exercise.name,
+						type: exercise.type,
+						duration: exercise.duration,
+						weight: exercise.weight,
+						reps: exercise.reps,
+						sets: exercise.sets,
+					},
+				})
+			);
+		} catch (err) {
+			console.log(err);
+			res.status(500).json(err);
+		}
+	} else if (exercise.type === 'cardio') {
+		try {res.status(200).json(
+			await Workout.create({
+				exercises: {
+					type: exercise.type,
+					name: exercise.name,
+					distance: exercise.distance,
+					duration: exercise.duration,
+				},
+			})
+		);
+		} catch (err) {
+			console.log(err);
+			res.status(500).json(err);
+		}
+	}
+});
