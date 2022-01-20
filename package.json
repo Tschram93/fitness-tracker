@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "watch": "nodemon server.js",
+    "start": "node seeders/seed.js && node server.js",
+    "watch": "node seeders/seed.js && nodemon server.js",
     "seed": "node seeders/seed.js"
   },
   "author": "",
